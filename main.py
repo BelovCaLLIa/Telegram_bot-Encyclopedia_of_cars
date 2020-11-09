@@ -1,17 +1,30 @@
-# This is a sample Python script.
+import logging
+import config
+# Это библиотека аснхронная
+# Класс бота, Dispatcher доставщик update, executor запускает бота
+from aiogram import Bot, Dispatcher, executor, types
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# Настроить ведение журнала
+logging.basicConfig(level=logging.INFO)
+
+# Инициализировать бота и диспетчера
+bot = Bot(token=config.API_TOKEN)
+dp = Dispatcher(bot)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@dp.message_handler(commands=['start', 'help'])
+async def send_welcome(message: types.Message):
+    """Этот обработчик будет вызываться, когда пользователь отправит команду /start или /help."""
+    await message.reply("Hi!\nI'm EchoBot!")
 
 
+# Доставка сообщений (Это дикоратор)
+@dp.message_handler()
+async def echo(message: types.Message):
+    await message.answer(message.text)
 
-# Press the green button in the gutter to run the script.
+
+# Основнаю функция
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # Делает запросы get update к Telegram, доставляет нам сообщение
+    executor.start_polling(dp, skip_updates=True)
