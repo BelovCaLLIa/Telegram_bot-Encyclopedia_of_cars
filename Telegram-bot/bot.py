@@ -1,26 +1,50 @@
+# Позволяет установить всё в одну команду
+# -pip install -r (имя этого файла)
+# Нужные библиотеки для проекта:
+# aiogram
+# Для работы с БД PosgresSql:
+# asyncpg
+# python-dotenv
+
+import asyncio
 import logging
 import config
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
-from aiogram.dispatcher.filters.builtin import Command, CommandHelp, CommandStart, Text
+from aiogram.dispatcher.filters.builtin import Command, CommandHelp, Text
 # Класс бота, Dispatcher доставщик update, executor запускает бота
 from aiogram import Bot, Dispatcher, types
 # Импортируем созданные кнопки
 from Keyboard import menu
 from inline import choice, like_callback
+# Sql
+from sql import create_pool
 
 # Настроить ведение журнала
-logging.basicConfig(level=logging.INFO)
+# Более удобная форма
+logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s] %(message)s',
+                    level=logging.INFO)
 
 # Инициализировать бота и диспетчера
 # parse_mode нужен для форматирования
+# bot = Bot(token=config.API_TOKEN)
+# dp = Dispatcher(bot)
 bot = Bot(token=config.API_TOKEN)
 dp = Dispatcher(bot)
 
+# Соединение с БД create_pool()
+loop = asyncio.get_event_loop()
+db = loop.run_until_complete(create_pool())
+
 
 # Ответ на start
-@dp.message_handler(CommandStart())
-async def bot_start(message: types.Message):
-    await message.answer("Привет!")
+# @dp.message_handler(CommandStart())
+# async def bot_start(message: types.Message):
+#     await message.answer("Привет!")
+
+
+# Закрытие бота
+async def stop_bot(db):
+    await bot.close()
 
 
 # Ответ на help
@@ -76,7 +100,7 @@ async def lick(call: CallbackQuery, callback_data: dict):
     await call.message.edit_reply_markup(reply_markup=None)
 
 
-# Второй отлов нажатия дизлайка
+# Второй, отлов нажатия дизлайка
 @dp.callback_query_handler(like_callback.filter(emotion="dislike"))
 async def dislike(call: CallbackQuery, callback_data: dict):
     await call.answer(cache_time=60)
