@@ -8,7 +8,8 @@
 
 import asyncio
 import logging
-import config
+from config import admin_id, TOKEN
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.dispatcher.filters.builtin import Command, CommandHelp, Text
 # Класс бота, Dispatcher доставщик update, executor запускает бота
@@ -17,7 +18,7 @@ from aiogram import Bot, Dispatcher, types
 from Keyboard import menu
 from inline import choice, like_callback
 # Sql
-from sql import create_pool
+from sql import create_pool, create_db
 
 # Настроить ведение журнала
 # Более удобная форма
@@ -26,24 +27,29 @@ logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(
 
 # Инициализировать бота и диспетчера
 # parse_mode нужен для форматирования
-# bot = Bot(token=config.API_TOKEN)
-# dp = Dispatcher(bot)
-bot = Bot(token=config.API_TOKEN)
-dp = Dispatcher(bot)
+storage = MemoryStorage()
+bot = Bot(token=TOKEN, parse_mode="HTML")
+dp = Dispatcher(bot, storage=storage)
 
 # Соединение с БД create_pool()
 loop = asyncio.get_event_loop()
 db = loop.run_until_complete(create_pool())
 
 
-# Ответ на start
+# # Ответ на start
 # @dp.message_handler(CommandStart())
 # async def bot_start(message: types.Message):
 #     await message.answer("Привет!")
 
+async def on_startup(dp):
+    # Ждём запуска Бд
+    await asyncio.sleep(10)
+    await create_db()
+    await bot.send_message(admin_id, "Я запущен!")
+
 
 # Закрытие бота
-async def stop_bot(db):
+async def on_shutdown(db):
     await bot.close()
 
 

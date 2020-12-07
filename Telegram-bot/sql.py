@@ -5,7 +5,7 @@ import asyncpg
 # Для дебага
 import logging
 
-from config import PG_USER, PG_PASS, HOST
+from config import PG_USER, PG_PASS, host
 
 
 # Настроить ведение журнала
@@ -23,13 +23,13 @@ async def create_db():
     conn: asyncpg.Connection = await asyncpg.connect(
         user=PG_USER,
         password=PG_PASS,
-        host=HOST
+        host=host
     )
     # Выполнение команды
     await conn.execute(create_db_command)
-    logging.info("Table has been created")
     # Закрываем соединение
     await conn.close()
+    logging.info("Table has been created")
 
 
 # Создание пулла соединений для бота
@@ -38,7 +38,7 @@ async def create_pool():
     return await asyncpg.create_pool(
         user=PG_USER,
         password=PG_PASS,
-        host=HOST
+        host=host
     )
 
 # Если запустим только этот файл у нас выполниться только эта функция
