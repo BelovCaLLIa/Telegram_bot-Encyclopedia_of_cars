@@ -9,7 +9,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - ".env"
+      - "e.env"
 
   adminer:
     container_name: adminer
@@ -26,4 +26,4 @@ services:
     restart: always
 
     env_file:
-      - ".env"
+      - "e.env"

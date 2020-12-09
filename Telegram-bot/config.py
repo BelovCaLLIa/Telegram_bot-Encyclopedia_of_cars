@@ -2,12 +2,15 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Явное указание из какого файла брать переменные
+dotenv_path = os.path.join(os.path.dirname(__file__), 'e.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
 # Токен моего бота
-TOKEN = "1439442608:AAGJ4iz2tSiN6aBb1LdSCWvIrz3ZsONVaSc"
+TOKEN = os.getenv("TOKEN")
 # Chat id
-admin_id = "456334972"
+admin_id = os.getenv("ADMIN_ID")
 # ip докера-a
 host = os.getenv("HOST")
 PG_USER = os.getenv("PG_USER")

@@ -12,34 +12,39 @@ from config import PG_USER, PG_PASS, host
 logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s] %(message)s',
                     level=logging.INFO)
 
+try:
+    # Создание таблицы 1 раз
+    async def create_db():
+        # Открываем файл, читаем и подгружаем в переменныю
+        create_db_command = open("users_db.sql", "r").read()
 
-# Создание таблицы 1 раз
-async def create_db():
-    # Открываем файл, читаем и подгружаем в переменныю
-    create_db_command = open("users_db.sql", "r").read()
-
-    logging.info("Connected to data base")
-    # Создаём переменныю с подсказкой
-    conn: asyncpg.Connection = await asyncpg.connect(
-        user=PG_USER,
-        password=PG_PASS,
-        host=host
-    )
-    # Выполнение команды
-    await conn.execute(create_db_command)
-    # Закрываем соединение
-    await conn.close()
-    logging.info("Table has been created")
+        logging.info("Connected to data base")
+        # Создаём переменныю с подсказкой
+        conn: asyncpg.Connection = await asyncpg.connect(
+            user=PG_USER,
+            password=PG_PASS,
+            host=host
+        )
+        # Выполнение команды
+        await conn.execute(create_db_command)
+        # Закрываем соединение
+        await conn.close()
+        logging.info("Table has been created")
+except OSError:
+    logging.info("Ошибка создания БД")
 
 
 # Создание пулла соединений для бота
 # Возвращает соединение которое будет подкл. и откл.
-async def create_pool():
-    return await asyncpg.create_pool(
-        user=PG_USER,
-        password=PG_PASS,
-        host=host
-    )
+try:
+    async def create_pool():
+        return await asyncpg.create_pool(
+            user=PG_USER,
+            password=PG_PASS,
+            host=host
+        )
+except OSError:
+    logging.info("Ошибка при подключении к БД")
 
 # Если запустим только этот файл у нас выполниться только эта функция
 # Создастся база
