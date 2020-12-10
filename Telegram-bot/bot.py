@@ -1,20 +1,29 @@
 import logging
-import config
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
-from aiogram.dispatcher.filters.builtin import Command, CommandHelp, CommandStart, Text
+
 # Класс бота, Dispatcher доставщик update, executor запускает бота
 from aiogram import Bot, Dispatcher, types
+from aiogram.dispatcher.filters.builtin import Command, CommandHelp, CommandStart, Text
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
+
+import config
 # Импортируем созданные кнопки
 from Keyboard import menu
 from inline import choice, like_callback
 
+# Для бд
+from users_sql import SQLighter
+
 # Настроить ведение журнала
-logging.basicConfig(level=logging.INFO)
+# Более удобная форма
+logging.basicConfig(format=u'%(filename)s [LINE:%(lineno)d] #%(levelname)-8s [%(asctime)s] %(message)s',
+                    level=logging.INFO)
 
 # Инициализировать бота и диспетчера
 # parse_mode нужен для форматирования
 bot = Bot(token=config.API_TOKEN)
 dp = Dispatcher(bot)
+# Передаём файл с бд
+db = SQLighter("users_db.db")
 
 
 # Ответ на start
@@ -30,6 +39,8 @@ async def bot_help(message: types.Message):
             '/start - Начать диалог',
             '/menu - Получить список команд',
             '/remove - Убирает кнопки',
+            '/subscribe - Подписаться на рассылку',
+            '/unsubscribe - Отписаться от рассылки',
             '/help - Получить справку']
     await message.answer('\n'.join(text))
 
@@ -83,3 +94,29 @@ async def dislike(call: CallbackQuery, callback_data: dict):
     logging.info(f"call = {callback_data}")
     await call.message.answer("Буду стараться")
     await call.message.edit_reply_markup(reply_markup=None)
+
+
+# Команда активации подписки
+@dp.message_handler(commands=["subscribe"])
+async def subscribe(message: types.Message):
+    if not db.subscriber_exists(message.from_user.id):
+        # Если пользователя нет, то добавляем его
+        db.add_subscriber(message.from_user.id, message.from_user.username, message.from_user.full_name)
+    else:
+        # Если он уже есть, то просто обнавляем статус подписки
+        db.update_subscription(message.from_user.id, True)
+
+    await message.answer("Вы успешно подписались!")
+
+
+# Команда отписки
+@dp.message_handler(commands=["unsubscribe"])
+async def unsubscribe(message: types.Message):
+    if not db.subscriber_exists(message.from_user.id):
+        # Если пользователя нет, то добавляем его с неактивной подпиской
+        db.add_subscriber(message.from_user.id, message.from_user.username, message.from_user.full_name, False)
+        await message.answer("Вы итак не подписаны.")
+    else:
+        # если он уже есть, то просто обновляем статус подписки
+        db.update_subscription(message.from_user.id, False)
+        await message.answer("Вы успешно отписались.")
