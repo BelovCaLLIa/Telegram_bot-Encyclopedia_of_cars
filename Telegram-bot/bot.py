@@ -12,6 +12,10 @@ from inline import choice, like_callback
 
 # Для бд
 from users_sql import SQLighter
+from info_car_sql import SQLighterCar
+
+import random
+import time
 
 # Настроить ведение журнала
 # Более удобная форма
@@ -24,6 +28,27 @@ bot = Bot(token=config.API_TOKEN)
 dp = Dispatcher(bot)
 # Передаём файл с бд
 db = SQLighter("users_db.db")
+db_car = SQLighterCar("info_car_db.db")
+
+# Количество записей в БД
+max_count_db = 60
+
+# Старое рандомное число
+old_rand = 0
+
+
+# Генирация рандомного числа
+def rand():
+    # я знаю что так не очень хорошо делать, но как иначе?
+    global old_rand
+    shuffle = list(range(1, max_count_db + 1))
+    # Перемешка элементов
+    # random.shuffle(shuffle)
+    random_value = random.choice(shuffle)
+    if old_rand == random_value:
+        rand()
+    old_rand = random_value
+    return random_value
 
 
 # Ответ на start
@@ -54,18 +79,56 @@ async def show_menu(message: Message):
 # Теперь нужно сделать handler для каждой кнопки
 @dp.message_handler(Text(equals="Случайный автомобиль"))
 async def random_car(message: Message):
-    # Убираем кнопку
-    await message.answer("Вы выброли 'Случайный автомобиль'", reply_markup=choice)
+    # Вывод информации в боте о машине
+    value = rand()
+    caption = db_car.export_text_about_car(value)
+    file_photo = db_car.export_photo_front(value)
+    # Многострадальные преобразования
+    photo = open("".join(map(str, file_photo[0])), 'rb')
+    await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
 
 
 @dp.message_handler(Text(equals="ТОП-5 Красивых машин"))
 async def beautiful_car(message: Message):
-    await message.answer("Вы выброли 'ТОП-5 Красивых машин'", reply_markup=ReplyKeyboardRemove())
+    # 5, 18, 26, 51, 52
+    beautiful_cars_list = [5, 18, 26, 51, 52]
+    for i in range(len(beautiful_cars_list)):
+        caption = db_car.export_text_about_car(beautiful_cars_list[i])
+        file_photo = db_car.export_photo_front(beautiful_cars_list[i])
+        photo = open("".join(map(str, file_photo[0])), 'rb')
+        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+    # reply_markup=ReplyKeyboardRemove() - убирать кнопки
 
 
 @dp.message_handler(Text(equals="ТОП-5 Интересных машин"))
 async def interesting_car(message: Message):
-    await message.answer("Вы выброли 'ТОП-5 Интересных машин'", reply_markup=ReplyKeyboardRemove())
+    # 25, 26, 28, 46, 53
+    interesting_cars = [25, 26, 28, 46, 53]
+    for i in range(len(interesting_cars)):
+        caption = db_car.export_text_about_car(interesting_cars[i])
+        file_photo = db_car.export_photo_front(interesting_cars[i])
+        photo = open("".join(map(str, file_photo[0])), 'rb')
+        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+
+
+@dp.message_handler(Text(equals="ТОП-5 Машин группы B"))
+async def rally_car(message: Message):
+    rally_cars = [10, 56, 55, 58, 57]
+    for i in range(len(rally_cars)):
+        caption = db_car.export_text_about_car(rally_cars[i])
+        file_photo = db_car.export_photo_front(rally_cars[i])
+        photo = open("".join(map(str, file_photo[0])), 'rb')
+        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+
+
+@dp.message_handler(Text(equals="ТОП-5 Спортивных машин"))
+async def sport_car(message: Message):
+    sport_cars = [1, 8, 30, 34, 35]
+    for i in range(len(sport_cars)):
+        caption = db_car.export_text_about_car(sport_cars[i])
+        file_photo = db_car.export_photo_front(sport_cars[i])
+        photo = open("".join(map(str, file_photo[0])), 'rb')
+        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
 
 
 # Уберает кнопки
@@ -81,8 +144,9 @@ async def lick(call: CallbackQuery, callback_data: dict):
     # Убираем часики
     # Это более простая констукция
     await call.answer(cache_time=60)
-    # Смотрим что там
+    # Смотрим что там в консоле
     logging.info(f"call = {callback_data}")
+    db_car.likes(call.message.caption)
     await call.message.answer("Спасибо за лайк")
     await call.message.edit_reply_markup(reply_markup=None)
 
@@ -92,6 +156,7 @@ async def lick(call: CallbackQuery, callback_data: dict):
 async def dislike(call: CallbackQuery, callback_data: dict):
     await call.answer(cache_time=60)
     logging.info(f"call = {callback_data}")
+    db_car.dislikes(call.message.caption)
     await call.message.answer("Буду стараться")
     await call.message.edit_reply_markup(reply_markup=None)
 
