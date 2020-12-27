@@ -7,12 +7,12 @@
 С пользовательской точки зрения мой бот имеет не так много команд,
 но я надеюсь подборка автомобилей сможет Вас удивить.<br>
 Список команд бота: <br>
-![Screenshot](Screenshot\Help.png) <br>
+![Help](https://user-images.githubusercontent.com/22397961/103173431-fb50a900-486b-11eb-8244-ac3bb00a28dd.png) <br>
 <li>Команда /start просто приветствует пользователя;
 <li>Команда /menu самая интересная:<br>
 Она предлагает пользователю нажать на одну из выводимых кнопок<br>
 
-![Screenshot](Screenshot\Menu.png) <br>
+![Menu](https://user-images.githubusercontent.com/22397961/103173518-a3ff0880-486c-11eb-8444-fa64dcde53b7.png) <br>
 
 Содержание кнопок говорит само за себя.<br>
 <li>Команда /remove убирает всё, что вызвано командой /menu<br>
@@ -26,7 +26,7 @@
 и с кнопками, позволяющими оценить авто.<br>
 Например:<br>
  
- ![Screenshot](Screenshot\Avto.png) <br>
+ ![Avto](https://user-images.githubusercontent.com/22397961/103173527-b8430580-486c-11eb-9e6f-21640c7acb1c.png) <br>
  И если машина заинтересует человека, он может пойти в интернет и узнать 
  более подробную информацию о ней. В будующих версиях можно будет связать
  телеграмм бота с сайтам на автомобильныю тиматику, где будет статья об этой
@@ -74,15 +74,15 @@
  в столбце like_dynamics показывается число на сколько в плюсе или минусе
  тот или иной автомобиль:<br>
  
- ![Screenshot](Screenshot\DB_car_1.png) <br>
+ ![DB_car_1](https://user-images.githubusercontent.com/22397961/103173580-f9d3b080-486c-11eb-9e75-c2043ec1ccd7.png) <br>
  
- ![Screenshot](Screenshot\DB_car_2.png) <br>
+ ![DB_car_2](https://user-images.githubusercontent.com/22397961/103173583-fdffce00-486c-11eb-84b4-5f0674e68b09.png) <br>
  
   Во второй базе данных показанна информация о подписавшихся пользователех,
   причём если пользователь отписался, он остаётся в базе данных, но со статусом,
   показывающем, что он отписался.<br>
   
-  ![Screenshot](Screenshot\Users_BD.png) <br>
+  ![Users_BD](https://user-images.githubusercontent.com/22397961/103173585-00fabe80-486d-11eb-87fe-1a92afb581e3.png) <br>
   
   P.S.<br>
   Как видиет, кроме меня пока никто не рискнул подписатся =)<br>
