@@ -77,58 +77,68 @@ async def show_menu(message: Message):
 
 
 # Теперь нужно сделать handler для каждой кнопки
-@dp.message_handler(Text(equals="Случайный автомобиль"))
+@dp.message_handler(Text(equals="Случайный автомобиль 🎲"))
 async def random_car(message: Message):
     # Вывод информации в боте о машине
     value = rand()
-    caption = db_car.export_text_about_car(value)
+    info = db_car.export_model(value)
+    info += db_car.export_text_about_car(value)
+    caption = "".join(map(str, info[0] + info[1]))
     file_photo = db_car.export_photo_front(value)
     # Многострадальные преобразования
     photo = open("".join(map(str, file_photo[0])), 'rb')
-    await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+    await message.answer_photo(photo=photo, caption=caption, reply_markup=choice)
 
 
-@dp.message_handler(Text(equals="ТОП-5 Красивых машин"))
+@dp.message_handler(Text(equals="🔥 ТОП-5 Красивых машин"))
 async def beautiful_car(message: Message):
     # 5, 18, 26, 51, 52
     beautiful_cars_list = [5, 18, 26, 51, 52]
     for i in range(len(beautiful_cars_list)):
-        caption = db_car.export_text_about_car(beautiful_cars_list[i])
+        info = db_car.export_model(beautiful_cars_list[i])
+        info += db_car.export_text_about_car(beautiful_cars_list[i])
+        caption = "".join(map(str, info[0] + info[1]))
         file_photo = db_car.export_photo_front(beautiful_cars_list[i])
         photo = open("".join(map(str, file_photo[0])), 'rb')
-        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+        await message.answer_photo(photo=photo, caption=caption, reply_markup=choice)
     # reply_markup=ReplyKeyboardRemove() - убирать кнопки
 
 
-@dp.message_handler(Text(equals="ТОП-5 Интересных машин"))
+@dp.message_handler(Text(equals="🔥 ТОП-5 Интересных машин"))
 async def interesting_car(message: Message):
     # 25, 26, 28, 46, 53
     interesting_cars = [25, 26, 28, 46, 53]
     for i in range(len(interesting_cars)):
-        caption = db_car.export_text_about_car(interesting_cars[i])
+        info = db_car.export_model(interesting_cars[i])
+        info += db_car.export_text_about_car(interesting_cars[i])
+        caption = "".join(map(str, info[0] + info[1]))
         file_photo = db_car.export_photo_front(interesting_cars[i])
         photo = open("".join(map(str, file_photo[0])), 'rb')
-        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+        await message.answer_photo(photo=photo, caption=caption, reply_markup=choice)
 
 
-@dp.message_handler(Text(equals="ТОП-5 Машин группы B"))
+@dp.message_handler(Text(equals="🔥 ТОП-5 Машин группы B"))
 async def rally_car(message: Message):
     rally_cars = [10, 56, 55, 58, 57]
     for i in range(len(rally_cars)):
-        caption = db_car.export_text_about_car(rally_cars[i])
+        info = db_car.export_model(rally_cars[i])
+        info += db_car.export_text_about_car(rally_cars[i])
+        caption = "".join(map(str, info[0] + info[1]))
         file_photo = db_car.export_photo_front(rally_cars[i])
         photo = open("".join(map(str, file_photo[0])), 'rb')
-        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+        await message.answer_photo(photo=photo, caption=caption, reply_markup=choice)
 
 
-@dp.message_handler(Text(equals="ТОП-5 Спортивных машин"))
+@dp.message_handler(Text(equals="🔥 ТОП-5 Спортивных машин"))
 async def sport_car(message: Message):
     sport_cars = [1, 8, 30, 34, 35]
     for i in range(len(sport_cars)):
-        caption = db_car.export_text_about_car(sport_cars[i])
+        info = db_car.export_model(sport_cars[i])
+        info += db_car.export_text_about_car(sport_cars[i])
+        caption = "".join(map(str, info[0] + info[1]))
         file_photo = db_car.export_photo_front(sport_cars[i])
         photo = open("".join(map(str, file_photo[0])), 'rb')
-        await message.answer_photo(photo=photo, caption="".join(map(str, caption[0])), reply_markup=choice)
+        await message.answer_photo(photo=photo, caption=caption, reply_markup=choice)
 
 
 # Уберает кнопки
@@ -146,7 +156,18 @@ async def lick(call: CallbackQuery, callback_data: dict):
     await call.answer(cache_time=60)
     # Смотрим что там в консоле
     logging.info(f"call = {callback_data}")
-    db_car.likes(call.message.caption)
+    # Отделяем из ответа название модели
+    list_model = ""
+    for i in range(len(call.message.caption)):
+        list_model += call.message.caption[i]
+        last_element = call.message.caption[i-1]
+        last_element += call.message.caption[i]
+        if last_element == "\n\n":
+            break
+        else:
+            last_element = " "
+    # Отправляем запрос, переводя list в str
+    db_car.likes(str(list_model))
     await call.message.answer("Спасибо за лайк")
     await call.message.edit_reply_markup(reply_markup=None)
 
@@ -156,7 +177,18 @@ async def lick(call: CallbackQuery, callback_data: dict):
 async def dislike(call: CallbackQuery, callback_data: dict):
     await call.answer(cache_time=60)
     logging.info(f"call = {callback_data}")
-    db_car.dislikes(call.message.caption)
+    # Отделяем из ответа название модели
+    list_model = ""
+    for i in range(len(call.message.caption)):
+        list_model += call.message.caption[i]
+        last_element = call.message.caption[i - 1]
+        last_element += call.message.caption[i]
+        if last_element == "\n\n":
+            break
+        else:
+            last_element = " "
+    # Отправляем запрос, переводя list в str
+    db_car.dislikes(str(list_model))
     await call.message.answer("Буду стараться")
     await call.message.edit_reply_markup(reply_markup=None)
 

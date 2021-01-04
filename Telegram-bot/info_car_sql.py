@@ -7,6 +7,11 @@ class SQLighterCar:
         self.connection = sqlite3.connect(database)
         self.cursor = self.connection.cursor()
 
+    def export_model(self, id_car):
+        """Возврат модели"""
+        with self.connection:
+            return self.cursor.execute("SELECT model FROM car WHERE id = ?", (id_car,)).fetchall()
+
     def export_photo_front(self, id_car):
         """Вывод фото машины"""
         with self.connection:
@@ -17,15 +22,15 @@ class SQLighterCar:
         with self.connection:
             return self.cursor.execute("SELECT info FROM car WHERE id = ?", (id_car,)).fetchall()
 
-    def likes(self, text_car):
+    def likes(self, model):
         """+1 к оценки машины"""
         with self.connection:
-            self.cursor.execute("UPDATE car SET like_dynamics = like_dynamics + 1 WHERE info = ?", (text_car,)).fetchall()
+            self.cursor.execute("UPDATE car SET like_dynamics = like_dynamics + 1 WHERE model = ?", (model,)).fetchall()
 
-    def dislikes(self, text_car):
+    def dislikes(self, model):
         """-1 к оценки машины"""
         with self.connection:
-            self.cursor.execute("UPDATE car SET like_dynamics = like_dynamics - 1 WHERE info = ?", (text_car,)).fetchall()
+            self.cursor.execute("UPDATE car SET like_dynamics = like_dynamics - 1 WHERE model = ?", (model,)).fetchall()
 
     def close(self):
         """Закрываем соединение с БД"""
